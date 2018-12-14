@@ -10,6 +10,7 @@ namespace Hetras;
 
 
 use Hetras\Builders\FolioBuilder;
+use Hetras\Builders\HotelBuilder;
 use Hetras\Builders\HouseAccountBuilder;
 use Hetras\Utils\Request;
 
@@ -37,6 +38,11 @@ class Hetras
         $this->request = new Request( $app_id, $app_key, $options, $headers );
     }
 
+    /**
+     * @param $hotelId
+     *
+     * @return \Hetras\Builders\FolioBuilder
+     */
     public function folios( $hotelId )
     {
         $builder = new FolioBuilder( $this->request );
@@ -46,6 +52,11 @@ class Hetras
         return $builder;
     }
 
+    /**
+     * @param $hotelId
+     *
+     * @return \Hetras\Builders\HouseAccountBuilder
+     */
     public function house_accounts( $hotelId )
     {
         $builder = new HouseAccountBuilder( $this->request );
@@ -53,6 +64,14 @@ class Hetras
         $builder->setHotelId( $hotelId );
 
         return $builder;
+    }
+
+    /**
+     * @return \Hetras\Builders\HotelBuilder
+     */
+    public function hotels()
+    {
+        return new HotelBuilder( $this->request );
     }
 
 }

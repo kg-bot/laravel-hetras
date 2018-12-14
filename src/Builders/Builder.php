@@ -30,7 +30,7 @@ class Builder
      *
      * @return \Illuminate\Support\Collection|Model[]
      */
-    public function get( $filters = [] )
+    public function get( $filters = [], $query = null )
     {
         $urlFilters = '?limit=1500';
 
@@ -53,6 +53,12 @@ class Builder
             }
         }
 
+        if ( $query !== null ) {
+
+            $urlFilters .= '&' . $query;
+        }
+
+
         return $this->request->handleWithExceptions( function () use ( $urlFilters ) {
 
             $response     = $this->request->client->get( "{$this->entity}{$urlFilters}" );
@@ -60,20 +66,39 @@ class Builder
             $fetchedItems = collect( $responseData );
             $items        = collect( [] );
 
-            foreach ( $fetchedItems->first() as $index => $item ) {
+            if ( is_array( $fetchedItems->first() ) ) {
+
+                foreach ( $fetchedItems->first() as $index => $item ) {
 
 
-                /** @var Model $model */
-                $model = new $this->model( $this->request, $item );
+                    /** @var Model $model */
+                    $model = new $this->model( $this->request, $item );
 
-                if ( $model->needHotelId() ) {
+                    if ( $model->needHotelId() ) {
 
-                    $model->setHotelId( $this->hotelId );
+                        $model->setHotelId( $this->hotelId );
+                    }
+
+                    $items->push( $model );
+
+
                 }
+            } else {
+                foreach ( $fetchedItems as $index => $item ) {
 
-                $items->push( $model );
+
+                    /** @var Model $model */
+                    $model = new $this->model( $this->request, $item );
+
+                    if ( $model->needHotelId() ) {
+
+                        $model->setHotelId( $this->hotelId );
+                    }
+
+                    $items->push( $model );
 
 
+                }
             }
 
             return $items;
